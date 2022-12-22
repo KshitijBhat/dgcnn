@@ -126,25 +126,25 @@ class DGCNN(nn.Module):
         x = self.conv1(x)
         x1 = x.max(dim=-1, keepdim=False)[0]
 
-        print(f"x1 shape: {x1.shape()} print: {x1}")
+        print(f"x1 shape: {x1.shape} print: {x1}")
 
         x = get_graph_feature(x1, k=self.k)
         x = self.conv2(x)
         x2 = x.max(dim=-1, keepdim=False)[0]
 
-        print(f"x2 shape: {x2.shape()} print: {x2}")
+        print(f"x2 shape: {x2.shape} print: {x2}")
 
         x = get_graph_feature(x2, k=self.k)
         x = self.conv3(x)
         x3 = x.max(dim=-1, keepdim=False)[0]
 
-        print(f"x3 shape: {x3.shape()} print: {x3}")
+        print(f"x3 shape: {x3.shape} print: {x3}")
 
         x = get_graph_feature(x3, k=self.k)
         x = self.conv4(x)
         x4 = x.max(dim=-1, keepdim=False)[0]
 
-        print(f"x4 shape: {x4.shape()} print: {x4}")
+        print(f"x4 shape: {x4.shape} print: {x4}")
 
         x = torch.cat((x1, x2, x3, x4), dim=1)
 
