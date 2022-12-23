@@ -16,7 +16,6 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from topologylayer.functional.levelset_dionysus import Diagramlayer as DiagramlayerToplevel
 
 
 def knn(x, k):
@@ -149,33 +148,15 @@ class DGCNN(nn.Module):
         x = torch.cat((x1, x2, x3, x4), dim=1)
 
         x = self.conv5(x)
-        x1 = F.adaptive_max_pool1d(x, 1).view(batch_size, -1)
-        x2 = F.adaptive_avg_pool1d(x, 1).view(batch_size, -1)
-        x = torch.cat((x1, x2), 1)
+        x11 = F.adaptive_max_pool1d(x, 1).view(batch_size, -1)
+        x22 = F.adaptive_avg_pool1d(x, 1).view(batch_size, -1)
+        x = torch.cat((x11, x22), 1)
 
         x = F.leaky_relu(self.bn6(self.linear1(x)), negative_slope=0.2)
         x = self.dp1(x)
         x = F.leaky_relu(self.bn7(self.linear2(x)), negative_slope=0.2)
         x = self.dp2(x)
         x = self.linear3(x)
-        print(f"x shape: {x.shape}")
+        
         return x
-
-def trainToplevel():
-
-
-    ''' Diagramlayer Toplevel Setup'''
-    dtype=torch.float32
-    fx,fy,fz = 32, 64, 1024
-    axis_x = np.arange(0, fx)
-    axis_y = np.arange(0, fy)
-    axis_z = np.arange(0, fz)
-    
-    points = np.vstack(np.meshgrid(axis_x,axis_y,axis_z)).reshape(3,-1).T
-    from scipy.spatial import Delaunay
-    tri = Delaunay(points)
-    faces = tri.simplices.copy()
-    F = DiagramlayerToplevel().init_filtration(faces)
-    diagramlayerToplevel = DiagramlayerToplevel.apply
-    ''' '''
 

@@ -20,7 +20,7 @@ from data import ModelNet40
 from model import PointNet, DGCNN
 import numpy as np
 from torch.utils.data import DataLoader
-from util import cal_loss, IOStream
+from util import cal_loss,cal_top_loss, IOStream
 import sklearn.metrics as metrics
 
 
@@ -65,7 +65,8 @@ def train(args, io):
 
     scheduler = CosineAnnealingLR(opt, args.epochs, eta_min=args.lr)
     
-    criterion = cal_loss
+    criterion1 = cal_top_loss
+    criterion2 = cal_loss
 
     best_test_acc = 0
     for epoch in range(args.epochs):
@@ -84,7 +85,7 @@ def train(args, io):
             batch_size = data.size()[0]
             opt.zero_grad()
             logits = model(data)
-            loss = criterion(logits, label)
+            loss = criterion2(logits, label)
             loss.backward()
             opt.step()
             preds = logits.max(dim=1)[1]
@@ -115,7 +116,7 @@ def train(args, io):
             data = data.permute(0, 2, 1)
             batch_size = data.size()[0]
             logits = model(data)
-            loss = criterion(logits, label)
+            loss = criterion2(logits, label)
             preds = logits.max(dim=1)[1]
             count += batch_size
             test_loss += loss.item() * batch_size
