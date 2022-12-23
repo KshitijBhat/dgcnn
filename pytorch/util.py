@@ -13,6 +13,7 @@ import torch
 import torch.nn.functional as F
 from topologylayer.functional.levelset_dionysus import Diagramlayer as DiagramlayerToplevel
 from topologtlaye.functional.utils_dionysus import top_cost
+from topologylayer.nn import AlphaLayer, BarcodePolyFeature
 
 
 def cal_loss(pred, gold, smoothing=True):
@@ -74,6 +75,13 @@ def Toplevel2Dcost(x):
 
     return top_cost(x,diagramlayerToplevel,F)
 
+def AlphaLayer3Dcost(x):
+    layer = AlphaLayer(maxdim=1)
+    f1 = BarcodePolyFeature(0,1,6)
+    x = torch.autograd.Variable(x.type(torch.float), requires_grad=True)
+    loss = f1(layer(x))
+    return loss
+
 
 def cal_top_loss(pred, gold, smoothing=True):
     ''' Calculate cross entropy loss, apply label smoothing if needed. '''
@@ -92,7 +100,7 @@ def cal_top_loss(pred, gold, smoothing=True):
     else:
         loss = F.cross_entropy(pred, gold, reduction='mean')
 
-    loss = loss + Toplevel2Dcost(pred)
+    loss = loss + AlphaLayer3Dcost(pred)
     return loss
 
 
