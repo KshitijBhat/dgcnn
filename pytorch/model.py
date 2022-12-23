@@ -16,6 +16,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from topologylayer.functional.levelset_dionysus import Diagramlayer as DiagramlayerToplevel
 
 
 def knn(x, k):
@@ -126,25 +127,24 @@ class DGCNN(nn.Module):
         x = self.conv1(x)
         x1 = x.max(dim=-1, keepdim=False)[0]
 
-        print(f"x1 shape: {x1.shape} print: {x1}")
 
         x = get_graph_feature(x1, k=self.k)
         x = self.conv2(x)
         x2 = x.max(dim=-1, keepdim=False)[0]
 
-        print(f"x2 shape: {x2.shape} print: {x2}")
+        
 
         x = get_graph_feature(x2, k=self.k)
         x = self.conv3(x)
         x3 = x.max(dim=-1, keepdim=False)[0]
 
-        print(f"x3 shape: {x3.shape} print: {x3}")
+        
 
         x = get_graph_feature(x3, k=self.k)
         x = self.conv4(x)
         x4 = x.max(dim=-1, keepdim=False)[0]
 
-        print(f"x4 shape: {x4.shape} print: {x4}")
+        
 
         x = torch.cat((x1, x2, x3, x4), dim=1)
 
@@ -158,4 +158,24 @@ class DGCNN(nn.Module):
         x = F.leaky_relu(self.bn7(self.linear2(x)), negative_slope=0.2)
         x = self.dp2(x)
         x = self.linear3(x)
+        print(f"x shape: {x.shape}")
         return x
+
+def trainToplevel():
+
+
+    ''' Diagramlayer Toplevel Setup'''
+    dtype=torch.float32
+    fx,fy,fz = 32, 64, 1024
+    axis_x = np.arange(0, fx)
+    axis_y = np.arange(0, fy)
+    axis_z = np.arange(0, fz)
+    
+    points = np.vstack(np.meshgrid(axis_x,axis_y,axis_z)).reshape(3,-1).T
+    from scipy.spatial import Delaunay
+    tri = Delaunay(points)
+    faces = tri.simplices.copy()
+    F = DiagramlayerToplevel().init_filtration(faces)
+    diagramlayerToplevel = DiagramlayerToplevel.apply
+    ''' '''
+
