@@ -17,7 +17,7 @@ from torch.utils.data import Dataset
 
 
 def load_data(partition):
-    DATA_DIR = '/content'
+    DATA_DIR = '/kaggle/working'
     all_data = []
     all_label = []
     for h5_name in glob.glob(os.path.join(DATA_DIR, 'modelnet40_ply_hdf5_2048', 'ply_data_%s*.h5'%partition)):

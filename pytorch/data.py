@@ -32,7 +32,7 @@ def download():
 def load_data(partition):
     #download()
     #BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    DATA_DIR = '/content' #os.path.join(BASE_DIR, 'data')
+    DATA_DIR = '/kaggle/working' #os.path.join(BASE_DIR, 'data')
     all_data = []
     all_label = []
     for h5_name in glob.glob(os.path.join(DATA_DIR, 'modelnet40_ply_hdf5_2048', 'ply_data_%s*.h5'%partition)):
