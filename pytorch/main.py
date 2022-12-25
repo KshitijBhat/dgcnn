@@ -80,8 +80,8 @@ def train(args, io):
     
     scheduler = CosineAnnealingLR(opt, args.epochs, eta_min=args.lr)
     loss_fn = lambda a, b : (a - b).abs().sum(-1).sum(-1).sum(-1)
-    # criterion = cal_loss
-    criterion = loss_fn
+    criterion = cal_loss
+    # criterion = loss_fn
 
     best_test_acc = 0
     for epoch in range(args.epochs):
@@ -102,11 +102,18 @@ def train(args, io):
             # logits = model(data)
 
             logits, hidden1, hidden2, hidden3, hidden4 = model(data)
-            top_loss_out = top_batch_cost(logits.detach().cpu(), diagramlayerToplevel, F)
+            print(f"logits size: {logits.size()}")
+            print(f"hidden1 size: {hidden1.size()}")
+            print(f"hidden2 size: {hidden2.size()}")
+            print(f"hidden3 size: {hidden3.size()}")
+            print(f"hidden4 size: {hidden4.size()}")
+
+            top_loss_out = 0 #top_batch_cost(logits.detach().cpu(), diagramlayerToplevel, F)
             top_loss_hidden1 = top_batch_cost(hidden1.detach().cpu(), diagramlayerToplevel, F)
             top_loss_hidden2 = top_batch_cost(hidden2.detach().cpu(), diagramlayerToplevel, F)
             loss = criterion(logits, data)
             # loss_topo = getTopoLoss(z)
+            print(f"Hidden1 loss: {top_loss_hidden1}  Hidden2 loss: {top_loss_hidden2}")
 
             loss += top_loss_out + top_loss_hidden1 + top_loss_hidden2
 
@@ -140,7 +147,7 @@ def train(args, io):
             data, label = data.to(device), label.to(device).squeeze()
             data = data.permute(0, 2, 1)
             batch_size = data.size()[0]
-            logits = model(data)
+            logits, hidden1, hidden2, hidden3, hidden4 = model(data)
             loss = criterion(logits, label)
             preds = logits.max(dim=1)[1]
             count += batch_size
@@ -181,7 +188,7 @@ def test(args, io):
         data, label = data.to(device), label.to(device).squeeze()
         data = data.permute(0, 2, 1)
         batch_size = data.size()[0]
-        logits = model(data)
+        logits, hidden1, hidden2, hidden3, hidden4 = model(data)
         preds = logits.max(dim=1)[1]
         test_true.append(label.cpu().numpy())
         test_pred.append(preds.detach().cpu().numpy())

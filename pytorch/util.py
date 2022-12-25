@@ -12,7 +12,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from topologylayer.functional.levelset_dionysus import Diagramlayer as DiagramlayerToplevel
-from topologtlaye.functional.utils_dionysus import top_cost
+from topologylayer.functional.utils_dionysus import top_cost
 from topologylayer.nn import AlphaLayer, BarcodePolyFeature
 
 
