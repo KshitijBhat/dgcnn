@@ -23,7 +23,7 @@ from torch.utils.data import DataLoader
 from util import cal_loss, IOStream
 import sklearn.metrics as metrics
 from topologylayer.functional.levelset_dionysus import Diagramlayer as DiagramlayerToplevel
-from topologtlaye.functional.utils_dionysus import top_cost, top_batch_cost
+from topologylayer.functional.utils_dionysus import top_cost, top_batch_cost
 from topologylayer.nn import AlphaLayer, BarcodePolyFeature
 
 width, height = 8,8
