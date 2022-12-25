@@ -125,25 +125,25 @@ class DGCNN(nn.Module):
         x = get_graph_feature(x, k=self.k)
         x = self.conv1(x)
         x1 = x.max(dim=-1, keepdim=False)[0]
-
+        hidden1 = x1
 
         x = get_graph_feature(x1, k=self.k)
         x = self.conv2(x)
         x2 = x.max(dim=-1, keepdim=False)[0]
 
-        
+        hidden2 = x2
 
         x = get_graph_feature(x2, k=self.k)
         x = self.conv3(x)
         x3 = x.max(dim=-1, keepdim=False)[0]
 
-        
+        hidden3 = x3
 
         x = get_graph_feature(x3, k=self.k)
         x = self.conv4(x)
         x4 = x.max(dim=-1, keepdim=False)[0]
 
-        
+        hidden4 = x4
 
         x = torch.cat((x1, x2, x3, x4), dim=1)
 
@@ -158,5 +158,4 @@ class DGCNN(nn.Module):
         x = self.dp2(x)
         x = self.linear3(x)
         
-        return x
-
+        return x, hidden1, hidden2, hidden3, hidden4

@@ -110,7 +110,7 @@ def train(args, io):
     print('Summary')
     # model = nn.DataParallel(model)
     summary(model, (3,2048))
-    exit(0)
+    
     
     print("Let's use", torch.cuda.device_count(), "GPUs!")
 

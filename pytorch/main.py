@@ -20,8 +20,22 @@ from data import ModelNet40
 from model import PointNet, DGCNN
 import numpy as np
 from torch.utils.data import DataLoader
-from util import cal_loss,cal_top_loss, IOStream
+from util import cal_loss, IOStream
 import sklearn.metrics as metrics
+from topologylayer.functional.levelset_dionysus import Diagramlayer as DiagramlayerToplevel
+from topologtlaye.functional.utils_dionysus import top_cost, top_batch_cost
+from topologylayer.nn import AlphaLayer, BarcodePolyFeature
+
+width, height = 8,8
+axis_x = np.arange(0, width)
+axis_y = np.arange(0, height)
+grid_axes = np.array(np.meshgrid(axis_x, axis_y))
+grid_axes = np.transpose(grid_axes, (1, 2, 0))
+from scipy.spatial import Delaunay
+tri = Delaunay(grid_axes.reshape([-1, 2]))
+faces = tri.simplices.copy()
+F = DiagramlayerToplevel().init_filtration(faces)
+diagramlayerToplevel = DiagramlayerToplevel.apply
 
 
 def _init_():
@@ -63,10 +77,11 @@ def train(args, io):
         print("Use Adam")
         opt = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
 
-    scheduler = CosineAnnealingLR(opt, args.epochs, eta_min=args.lr)
     
-    criterion1 = cal_top_loss
-    criterion2 = cal_loss
+    scheduler = CosineAnnealingLR(opt, args.epochs, eta_min=args.lr)
+    loss_fn = lambda a, b : (a - b).abs().sum(-1).sum(-1).sum(-1)
+    # criterion = cal_loss
+    criterion = loss_fn
 
     best_test_acc = 0
     for epoch in range(args.epochs):
@@ -84,8 +99,18 @@ def train(args, io):
             data = data.permute(0, 2, 1)
             batch_size = data.size()[0]
             opt.zero_grad()
-            logits = model(data)
-            loss = criterion2(logits, label)
+            # logits = model(data)
+
+            logits, hidden1, hidden2, hidden3, hidden4 = model(data)
+            top_loss_out = top_batch_cost(logits.detach().cpu(), diagramlayerToplevel, F)
+            top_loss_hidden1 = top_batch_cost(hidden1.detach().cpu(), diagramlayerToplevel, F)
+            top_loss_hidden2 = top_batch_cost(hidden2.detach().cpu(), diagramlayerToplevel, F)
+            loss = criterion(logits, data)
+            # loss_topo = getTopoLoss(z)
+
+            loss += top_loss_out + top_loss_hidden1 + top_loss_hidden2
+
+            # loss = criterion2(logits, label)
             loss.backward()
             opt.step()
             preds = logits.max(dim=1)[1]
@@ -116,7 +141,7 @@ def train(args, io):
             data = data.permute(0, 2, 1)
             batch_size = data.size()[0]
             logits = model(data)
-            loss = criterion2(logits, label)
+            loss = criterion(logits, label)
             preds = logits.max(dim=1)[1]
             count += batch_size
             test_loss += loss.item() * batch_size
