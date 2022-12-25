@@ -77,11 +77,9 @@ def train(args, io):
         print("Use Adam")
         opt = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-4)
 
-    
     scheduler = CosineAnnealingLR(opt, args.epochs, eta_min=args.lr)
-    loss_fn = lambda a, b : (a - b).abs().sum(-1).sum(-1).sum(-1)
+    
     criterion = cal_loss
-    # criterion = loss_fn
 
     best_test_acc = 0
     for epoch in range(args.epochs):
@@ -99,25 +97,14 @@ def train(args, io):
             data = data.permute(0, 2, 1)
             batch_size = data.size()[0]
             opt.zero_grad()
-            # logits = model(data)
-
             logits, hidden1, hidden2, hidden3, hidden4 = model(data)
-            print(f"logits size: {logits.size()}")
-            print(f"hidden1 size: {hidden1.size()}")
-            print(f"hidden2 size: {hidden2.size()}")
-            print(f"hidden3 size: {hidden3.size()}")
-            print(f"hidden4 size: {hidden4.size()}")
-
             top_loss_out = 0 #top_batch_cost(logits.detach().cpu(), diagramlayerToplevel, F)
             top_loss_hidden1 = top_batch_cost(hidden1.detach().cpu(), diagramlayerToplevel, F)
             top_loss_hidden2 = top_batch_cost(hidden2.detach().cpu(), diagramlayerToplevel, F)
-            loss = criterion(logits, data)
-            # loss_topo = getTopoLoss(z)
+            loss = criterion(logits, label)
             print(f"Hidden1 loss: {top_loss_hidden1}  Hidden2 loss: {top_loss_hidden2}")
 
             loss += top_loss_out + top_loss_hidden1 + top_loss_hidden2
-
-            # loss = criterion2(logits, label)
             loss.backward()
             opt.step()
             preds = logits.max(dim=1)[1]
