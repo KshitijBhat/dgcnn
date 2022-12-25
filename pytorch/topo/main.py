@@ -102,7 +102,7 @@ def train(args, io):
             top_loss_hidden1 = top_batch_cost(hidden1.detach().cpu(), diagramlayerToplevel, F)
             top_loss_hidden2 = top_batch_cost(hidden2.detach().cpu(), diagramlayerToplevel, F)
             loss = criterion(logits, label)
-            print(f"Hidden1 loss: {top_loss_hidden1}  Hidden2 loss: {top_loss_hidden2}")
+            # print(f"Hidden1 loss: {top_loss_hidden1}  Hidden2 loss: {top_loss_hidden2}")
 
             loss += top_loss_out + top_loss_hidden1 + top_loss_hidden2
             loss.backward()
